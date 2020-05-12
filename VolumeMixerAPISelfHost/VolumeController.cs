@@ -7,14 +7,13 @@ using VolumeMixerAPISelfHost.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Drawing.Imaging;
 using CoreAudio;
-using CoreAudioMac;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace VolumeAPISelfHost.Controllers
 {
     //TODO: Device selector, if necessary
-    //TODO: Add project-local Icons for Device and SystemSounds. Pulling from dlls is not platform agnostic
+    //TODO: Add Icons for Device and SystemSounds
     //TODO: Security of any kind, code validation or something simple is okay
     //TODO: See if you can check for the port 8080 inbound firewall rule, and add it if it isnt there - only if the api wont prompt in the first place
     //TODO: QR code generator for easy login, print on console
@@ -26,8 +25,6 @@ namespace VolumeAPISelfHost.Controllers
         [HttpGet]
         public IEnumerable<string> GetSystemInfo()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
                 var deviceEnumerator = new MMDeviceEnumerator();
                 var device = deviceEnumerator.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eConsole);
                 var deviceCollection = deviceEnumerator.EnumerateAudioEndPoints(EDataFlow.eRender, DEVICE_STATE.DEVICE_STATE_ACTIVE);
@@ -46,13 +43,6 @@ namespace VolumeAPISelfHost.Controllers
 
                 Console.WriteLine("GET: SystemInfo...Success");
                 return result;
-            }
-            //In .NET Core, the MacOS enum value is replaced with Unix
-            else if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-
-            }
-            return new List<string> { "Linux is not supported" };
         }
 
         // GET: /volume/all
@@ -122,12 +112,6 @@ namespace VolumeAPISelfHost.Controllers
         [HttpPut("{processID}/{newVolume}")]
         public bool Put(int processID, int newVolume)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                new SystemScripts().SetVolumeLevel(newVolume);
-            }
-            else
-            {
                 Console.Write("PUT: UpdateVolume...");
                 if (newVolume > 100 || newVolume < 0)
                 {
@@ -160,8 +144,6 @@ namespace VolumeAPISelfHost.Controllers
 
                 Console.WriteLine("Success");
                 return true;
-            }
-            return false;
         }
 
 

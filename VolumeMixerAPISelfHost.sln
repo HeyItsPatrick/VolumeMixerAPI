@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeMixerAPISelfHost", "V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreAudio", "CoreAudio\CoreAudio.csproj", "{61571BA4-57C6-4D86-95A4-7D17F2707911}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreAudioMac", "CoreAudioMac\CoreAudioMac.csproj", "{D130244E-35E3-4A72-B54C-F11CA4188F55}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{61571BA4-57C6-4D86-95A4-7D17F2707911}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61571BA4-57C6-4D86-95A4-7D17F2707911}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61571BA4-57C6-4D86-95A4-7D17F2707911}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D130244E-35E3-4A72-B54C-F11CA4188F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D130244E-35E3-4A72-B54C-F11CA4188F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D130244E-35E3-4A72-B54C-F11CA4188F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D130244E-35E3-4A72-B54C-F11CA4188F55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
