@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using VolumeMixerAPISelfHost.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Drawing.Imaging;
 using CoreAudio;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -78,7 +76,7 @@ namespace VolumeAPISelfHost.Controllers
                 {
                     title = "System Sounds";
                     //PC with music note icon
-                    icon = Volume.ExtractIconFromFile("audiosrv.dll", 1, true);
+                    icon = Volume.ExtractIconFromFile("audiosrv.dll", 0, true);
                 }
                 else
                 {
@@ -176,7 +174,7 @@ namespace VolumeAPISelfHost.Controllers
                         if (session.IsSystemSoundsSession)
                         {
                             title = "System Sounds";
-                            icon = Volume.ExtractIconFromFile("audiosrv.dll", 1, true);
+                            icon = Volume.ExtractIconFromFile("audiosrv.dll", 0, true);
                         }
                         else
                         {
