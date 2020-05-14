@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QRCoder;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -13,9 +14,7 @@ namespace VolumeMixerAPISelfHost
     {
         static void Main()
         {
-
             string localIP = "";
-            string localPort = "8080"; 
             var hostName = Dns.GetHostName();
             foreach (var item in Dns.GetHostEntry(hostName).AddressList)
             {
@@ -23,10 +22,25 @@ namespace VolumeMixerAPISelfHost
                     localIP = item.ToString();
             }
 
+            //TcpListener server = new TcpListener(IPAddress.Loopback, 0);
+            //server.Start();
+            //string localPort = ((IPEndPoint)server.LocalEndpoint).Port.ToString();
+            //server.Stop();
+            string localPort = "8080";
+
+            Console.WindowHeight = 40;
             Console.WriteLine("Host:\t\t" + hostName);
             Console.WriteLine("IP Address:\t" + localIP);
             Console.WriteLine("Port:\t\t" +localPort);
             Console.WriteLine();
+
+            var generator = new QRCodeGenerator();
+            var data = generator.CreateQrCode(localIP+":"+localPort, QRCodeGenerator.ECCLevel.Q);
+            var code = new AsciiQRCode(data);
+            var image = code.GetGraphic(1);
+            Console.WriteLine(image);
+            Console.WriteLine();
+
 
             WebHost.CreateDefaultBuilder()
                 .UseUrls($"http://{localIP}:{localPort}")

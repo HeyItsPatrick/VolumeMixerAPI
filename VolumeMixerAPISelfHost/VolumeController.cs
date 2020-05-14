@@ -12,12 +12,6 @@ using Microsoft.CodeAnalysis;
 
 namespace VolumeAPISelfHost.Controllers
 {
-    //TODO: Device selector, if necessary
-    //TODO: Add Icons for Device and SystemSounds
-    //TODO: Security of any kind, code validation or something simple is okay
-    //TODO: See if you can check for the port 8080 inbound firewall rule, and add it if it isnt there - only if the api wont prompt in the first place
-    //TODO: QR code generator for easy login, print on console
-
     [ApiController]
     [Route("volume")]
     public class VolumeController : ControllerBase
@@ -39,7 +33,7 @@ namespace VolumeAPISelfHost.Controllers
                     MMDevice item = deviceCollection[i];
                     tempDeviceList.Add(item);
                 }
-                result.AddRange(tempDeviceList.OrderBy(d => d.FriendlyName).Select(d => "    " + d.FriendlyName).ToList());
+                result.AddRange(tempDeviceList.OrderBy(d => d.FriendlyName).Select(d => d.FriendlyName).ToList());
 
                 Console.WriteLine("GET: SystemInfo...Success");
                 return result;
