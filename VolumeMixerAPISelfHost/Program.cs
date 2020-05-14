@@ -22,11 +22,11 @@ namespace VolumeMixerAPISelfHost
                     localIP = item.ToString();
             }
 
-            //TcpListener server = new TcpListener(IPAddress.Loopback, 0);
-            //server.Start();
-            //string localPort = ((IPEndPoint)server.LocalEndpoint).Port.ToString();
-            //server.Stop();
-            string localPort = "8080";
+            //TcpListener finds a free port for us, so there is no risk of conflicting with another application
+            TcpListener server = new TcpListener(IPAddress.Loopback, 0);
+            server.Start();
+            string localPort = ((IPEndPoint)server.LocalEndpoint).Port.ToString();
+            server.Stop();
 
             Console.WindowHeight = 40;
             Console.WriteLine("Host:\t\t" + hostName);
