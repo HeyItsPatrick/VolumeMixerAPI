@@ -48,16 +48,20 @@ namespace VolumeAPISelfHost.Controllers
 
             var deviceVolume = (int)Math.Round(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
 
+            //Get Device icon; value is "iconPath,-resourceID"
+            string iconPathFull = device.Properties[PKEY.PKEY_DeviceClass_IconPath].Value.ToString();
+            string iconResourceIdentifier = iconPathFull.Substring(iconPathFull.IndexOf('-'));
+
             var result = new List<Volume>
+            {
+                new Volume
                 {
-                    new Volume
-                    {
-                        CurrentVolume = deviceVolume,
-                        ProcessID = -1,
-                        ProgramIcon = Volume.ExtractIconFromFile("mmres.dll", 1, true),
-                        ProgramName = device.FriendlyName
-                    }
-                };
+                    CurrentVolume = deviceVolume,
+                    ProcessID = -1,
+                    ProgramIcon = Volume.ExtractIconFromFile(iconPathFull.Substring(0,iconPathFull.IndexOf(',')), int.Parse(iconResourceIdentifier), true),
+                    ProgramName = device.FriendlyName
+                }
+            };
             for (int i = 0; i < device.AudioSessionManager2.Sessions.Count; i++)
             {
                 AudioSessionControl2 session = device.AudioSessionManager2.Sessions[i];
@@ -67,12 +71,14 @@ namespace VolumeAPISelfHost.Controllers
 
                 //SimpleAudioVolume.MasterVolume is not quite accurate on it's face. It is actually the Control volume as a percentage of the Device volume
                 string title = "";
+                //Generic application box icon
                 byte[] icon = Volume.ExtractIconFromFile("imageres.dll", 11, true);
 
                 if (session.IsSystemSoundsSession)
                 {
                     title = "System Sounds";
-                    icon = Volume.ExtractIconFromFile("netcenter.dll", 1, true);
+                    //PC with music note icon
+                    icon = Volume.ExtractIconFromFile("audiosrv.dll", 1, true);
                 }
                 else
                 {
@@ -138,17 +144,22 @@ namespace VolumeAPISelfHost.Controllers
         [HttpGet("{processID}")]
         public Volume GetVolumeByProcessID(int processID)
         {
+            Console.Write("GET: Single Volume...");
             var deviceEnum = new MMDeviceEnumerator();
             MMDevice device = deviceEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eConsole);
 
             var deviceVolume = (int)Math.Round(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
             if (processID < 0)
             {
+                string iconPathFull = device.Properties[PKEY.PKEY_DeviceClass_IconPath].Value.ToString();
+                string iconResourceIdentifier = iconPathFull.Substring(iconPathFull.IndexOf('-'));
+
+                Console.WriteLine("Success");
                 return new Volume
                 {
                     CurrentVolume = deviceVolume,
                     ProcessID = -1,
-                    ProgramIcon = new byte[0],
+                    ProgramIcon = Volume.ExtractIconFromFile(iconPathFull.Substring(0, iconPathFull.IndexOf(',')), int.Parse(iconResourceIdentifier), true),
                     ProgramName = device.FriendlyName
                 };
             }
@@ -160,38 +171,34 @@ namespace VolumeAPISelfHost.Controllers
                     if (session.GetProcessID == processID)
                     {
                         string title = "";
-                        Icon icon = SystemIcons.Error;
+                        byte[] icon = Volume.ExtractIconFromFile("imageres.dll", 11, true);
 
                         if (session.IsSystemSoundsSession)
                         {
                             title = "System Sounds";
-                            icon = SystemIcons.Application;
+                            icon = Volume.ExtractIconFromFile("audiosrv.dll", 1, true);
                         }
                         else
                         {
                             Process sessionProcess = Process.GetProcessById((int)session.GetProcessID);
                             title = Path.GetFileNameWithoutExtension(sessionProcess.MainModule.FileName);
                             if (System.IO.File.Exists(sessionProcess.MainModule.FileName))
-                                icon = Icon.ExtractAssociatedIcon(sessionProcess.MainModule.FileName);
+                                icon = Volume.ExtractIconFromFile(sessionProcess.MainModule.FileName, 0, true);
                         }
 
-                        using (var stream = new MemoryStream())
+                        Console.WriteLine("Success");
+                        return new Volume
                         {
-                            var img = icon.ToBitmap();
-                            img.Save(stream, ImageFormat.Png); //png so transparency info is maintained
-                            var byteArray = stream.ToArray();
-                            Console.WriteLine("GET: VolumeControlByID...Success");
-                            return new Volume
-                            {
-                                CurrentVolume = (int)Math.Round(session.SimpleAudioVolume.MasterVolume * deviceVolume),
-                                ProcessID = (int)session.GetProcessID,
-                                ProgramIcon = byteArray,
-                                ProgramName = (title ?? "NoTitle")
-                            };
-                        }
+                            CurrentVolume = (int)Math.Round(session.SimpleAudioVolume.MasterVolume * deviceVolume),
+                            ProcessID = (int)session.GetProcessID,
+                            ProgramIcon = icon,
+                            ProgramName = (title ?? "NoTitle")
+                        };
                     }
                 }
             }
+
+            Console.WriteLine("Failure");
             return new Volume();
         }
     }
