@@ -31,11 +31,11 @@ namespace VolumeMixerAPISelfHost
             Console.WindowHeight = 40;
             Console.WriteLine("Host:\t\t" + hostName);
             Console.WriteLine("IP Address:\t" + localIP);
-            Console.WriteLine("Port:\t\t" +localPort);
+            Console.WriteLine("Port:\t\t" + localPort);
             Console.WriteLine();
 
             var generator = new QRCodeGenerator();
-            var data = generator.CreateQrCode(localIP+":"+localPort, QRCodeGenerator.ECCLevel.Q);
+            var data = generator.CreateQrCode(localIP + ":" + localPort, QRCodeGenerator.ECCLevel.Q);
             var code = new AsciiQRCode(data);
             var image = code.GetGraphic(1);
             Console.WriteLine(image);
@@ -44,8 +44,8 @@ namespace VolumeMixerAPISelfHost
 
             WebHost.CreateDefaultBuilder()
                 .UseUrls($"http://{localIP}:{localPort}")
-                .ConfigureServices(services=> services.AddMvc())
-                .ConfigureLogging(log=>log.ClearProviders())
+                .ConfigureServices(services => services.AddMvc())
+                .ConfigureLogging(log => log.ClearProviders())
                 .Configure(app => { app.UseMvc(); app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); })
                 .Build()
                 .Run();
