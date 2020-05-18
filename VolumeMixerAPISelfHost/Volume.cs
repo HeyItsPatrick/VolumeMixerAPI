@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
@@ -9,14 +10,14 @@ namespace VolumeMixerAPISelfHost.Models
     {
         public string ProgramName { get; set; }
         public int CurrentVolume { get; set; }
-        public int ProcessID { get; set; }
+        public List<int> ProcessID { get; set; }
         public byte[] ProgramIcon { get; set; }
 
         public Volume()
         {
             ProgramName = "";
             CurrentVolume = 0;
-            ProcessID = 0;
+            ProcessID = new List<int>();
         }
 
         public static byte[] ExtractIconFromFile(string systemFile, int index, bool largeIcon)
