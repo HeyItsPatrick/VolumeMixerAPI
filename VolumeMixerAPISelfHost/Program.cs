@@ -28,7 +28,6 @@ namespace VolumeMixerAPISelfHost
             string localPort = ((IPEndPoint)server.LocalEndpoint).Port.ToString();
             server.Stop();
 
-            Console.WindowHeight = 40;
             Console.WriteLine("Host:\t\t" + hostName);
             Console.WriteLine("IP Address:\t" + localIP);
             Console.WriteLine("Port:\t\t" + localPort);
@@ -39,11 +38,12 @@ namespace VolumeMixerAPISelfHost
             var code = new AsciiQRCode(data);
             var image = code.GetGraphic(1);
             Console.WriteLine(image);
-            Console.WriteLine();
 
+            Terminal.Build();
 
             WebHost.CreateDefaultBuilder()
                 .UseUrls($"http://{localIP}:{localPort}")
+                .UseSetting(WebHostDefaults.SuppressStatusMessagesKey, "true")
                 .ConfigureServices(services => services.AddMvc())
                 .ConfigureLogging(log => log.ClearProviders())
                 .Configure(app => { app.UseMvc(); app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); })

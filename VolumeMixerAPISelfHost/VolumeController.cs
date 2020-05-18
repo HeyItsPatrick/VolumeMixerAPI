@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using CoreAudio;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using VolumeMixerAPISelfHost;
 
 namespace VolumeAPISelfHost.Controllers
 {
@@ -33,7 +34,7 @@ namespace VolumeAPISelfHost.Controllers
             }
             result.AddRange(tempDeviceList.OrderBy(d => d.FriendlyName).Select(d => d.FriendlyName).ToList());
 
-            Console.WriteLine("GET: SystemInfo...Success");
+            Terminal.PrintOutput("GET: SystemInfo...Success");
             return result;
         }
 
@@ -65,7 +66,7 @@ namespace VolumeAPISelfHost.Controllers
                 AudioSessionControl2 session = device.AudioSessionManager2.Sessions[i];
                 //Prevents returning duplicate processes
                 //if (result.Where(v => v.ProcessID == session.GetProcessID).Any())
-                if (result.Where(v=> v.ProcessID.Contains((int)session.GetProcessID)).Any())
+                if (result.Where(v => v.ProcessID.Contains((int)session.GetProcessID)).Any())
                     continue;
 
                 //SimpleAudioVolume.MasterVolume is not quite accurate on it's face. It is actually the Control volume as a percentage of the Device volume
@@ -100,7 +101,7 @@ namespace VolumeAPISelfHost.Controllers
                     }
                     catch (Exception e)
                     {
-                        continue;
+                        Terminal.PrintError(("Failed To Get Process ID " + e.Message).Substring(0, 60));
                     }
                 }
 
@@ -113,7 +114,7 @@ namespace VolumeAPISelfHost.Controllers
                 });
             }
 
-            Console.WriteLine("GET: VolumeControls...Success");
+            Terminal.PrintOutput("GET: VolumeControls...Success");
             return result.OrderBy(v => v.ProcessID.Min()).ToList();
         }
 
@@ -121,10 +122,9 @@ namespace VolumeAPISelfHost.Controllers
         [HttpPut("{processID}/{newVolume}")]
         public bool Put(int processID, int newVolume)
         {
-            Console.Write("PUT: UpdateVolume...");
             if (newVolume > 100 || newVolume < 0)
             {
-                Console.WriteLine("Failed");
+                Terminal.PrintError("PUT Update Volume Failed: Outside (0,100)");
                 return false;
             }
             var deviceEnum = new MMDeviceEnumerator();
@@ -138,7 +138,7 @@ namespace VolumeAPISelfHost.Controllers
             {
                 if (newVolume > deviceVolume) //No audio control is allowed above system volume
                 {
-                    Console.WriteLine("Failed");
+                    Terminal.PrintError("PUT Update Volume Failed: Outside Device Bounds");
                     return false;
                 }
                 for (int i = 0; i < device.AudioSessionManager2.Sessions.Count; i++)
@@ -151,7 +151,7 @@ namespace VolumeAPISelfHost.Controllers
                 }
             }
 
-            Console.WriteLine("Success");
+            Terminal.PrintOutput("PUT: UpdateVolume...Success");
             return true;
         }
 
@@ -160,7 +160,6 @@ namespace VolumeAPISelfHost.Controllers
         [HttpGet("{processID}")]
         public Volume GetVolumeByProcessID(int processID)
         {
-            Console.Write("GET: Single Volume...");
             var deviceEnum = new MMDeviceEnumerator();
             MMDevice device = deviceEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eConsole);
 
@@ -170,7 +169,7 @@ namespace VolumeAPISelfHost.Controllers
                 string iconPathFull = device.Properties[PKEY.PKEY_DeviceClass_IconPath].Value.ToString();
                 string iconResourceIdentifier = iconPathFull.Substring(iconPathFull.IndexOf('-'));
 
-                Console.WriteLine("Success");
+                Terminal.PrintOutput("GET: Single Volume...Success");
                 return new Volume
                 {
                     CurrentVolume = deviceVolume,
@@ -196,13 +195,20 @@ namespace VolumeAPISelfHost.Controllers
                         }
                         else
                         {
-                            Process sessionProcess = Process.GetProcessById((int)session.GetProcessID);
-                            title = Path.GetFileNameWithoutExtension(sessionProcess.MainModule.FileName);
-                            if (System.IO.File.Exists(sessionProcess.MainModule.FileName))
-                                icon = Volume.ExtractIconFromFile(sessionProcess.MainModule.FileName, 0, true);
+                            try
+                            {
+                                Process sessionProcess = Process.GetProcessById((int)session.GetProcessID);
+                                title = Path.GetFileNameWithoutExtension(sessionProcess.MainModule.FileName);
+                                if (System.IO.File.Exists(sessionProcess.MainModule.FileName))
+                                    icon = Volume.ExtractIconFromFile(sessionProcess.MainModule.FileName, 0, true);
+                            }
+                            catch (Exception e)
+                            {
+                                Terminal.PrintError(("Failed To Get Process ID " + e.Message).Substring(0, 60));
+                            }
                         }
 
-                        Console.WriteLine("Success");
+                        Terminal.PrintOutput("GET: Single Volume...Success");
                         return new Volume
                         {
                             CurrentVolume = (int)Math.Round(session.SimpleAudioVolume.MasterVolume * deviceVolume),
@@ -214,7 +220,7 @@ namespace VolumeAPISelfHost.Controllers
                 }
             }
 
-            Console.WriteLine("Failure");
+            Terminal.PrintError("GET Single Volume Failure: Invalid ID");
             return new Volume();
         }
     }
